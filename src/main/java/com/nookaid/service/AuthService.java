@@ -1,6 +1,6 @@
 
 package com.nookaid.service;
-
+import com.nookaid.dto.LoginRequest;
 import com.nookaid.dto.RegisterRequest;
 import com.nookaid.entity.User;
 import com.nookaid.repository.UserRepository;
@@ -37,5 +37,24 @@ public class AuthService {
 
         // Save user in PostgreSQL
         return userRepository.save(user);
+    }
+
+    public User login(LoginRequest request) {
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Invalid email or password")
+                );
+
+        if (!passwordEncoder.matches(
+                request.getPassword(),
+                user.getPassword())) {
+
+            throw new IllegalArgumentException(
+                    "Invalid email or password"
+            );
+        }
+
+        return user;
     }
 }
