@@ -1,6 +1,6 @@
 
 package com.nookaid.controller;
-
+import java.util.List;
 import com.nookaid.dto.HelpRequestRequest;
 import com.nookaid.dto.HelpRequestResponse;
 import com.nookaid.entity.HelpRequest;
@@ -48,4 +48,70 @@ public class HelpRequestController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @GetMapping
+    public ResponseEntity<List<HelpRequestResponse>> getAllRequests() {
+
+        List<HelpRequestResponse> responses =
+                helpRequestService.getAllRequests()
+                        .stream()
+                        .map(request -> new HelpRequestResponse(
+                                request.getId(),
+                                request.getTitle(),
+                                request.getDescription(),
+                                request.getCategory(),
+                                request.getStatus(),
+                                request.getUser().getId(),
+                                request.getUser().getName(),
+                                request.getCreatedAt()
+                        ))
+                        .toList();
+
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<HelpRequestResponse> getRequestById(
+            @PathVariable Long id
+    ) {
+
+        var request = helpRequestService.getRequestById(id);
+
+        HelpRequestResponse response = new HelpRequestResponse(
+                request.getId(),
+                request.getTitle(),
+                request.getDescription(),
+                request.getCategory(),
+                request.getStatus(),
+                request.getUser().getId(),
+                request.getUser().getName(),
+                request.getCreatedAt()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<HelpRequestResponse>> getRequestsByStatus(
+            @RequestParam String status
+    ) {
+
+        List<HelpRequestResponse> responses =
+                helpRequestService.getRequestsByStatus(status)
+                        .stream()
+                        .map(request -> new HelpRequestResponse(
+                                request.getId(),
+                                request.getTitle(),
+                                request.getDescription(),
+                                request.getCategory(),
+                                request.getStatus(),
+                                request.getUser().getId(),
+                                request.getUser().getName(),
+                                request.getCreatedAt()
+                        ))
+                        .toList();
+
+        return ResponseEntity.ok(responses);
+    }
+
 }

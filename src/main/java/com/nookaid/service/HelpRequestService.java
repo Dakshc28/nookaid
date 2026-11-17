@@ -1,6 +1,7 @@
 
 package com.nookaid.service;
-
+import java.util.List;
+import java.util.Optional;
 import com.nookaid.dto.HelpRequestRequest;
 import com.nookaid.entity.HelpRequest;
 import com.nookaid.entity.User;
@@ -43,4 +44,21 @@ public class HelpRequestService {
 
         return helpRequestRepository.save(helpRequest);
     }
+    public List<HelpRequest> getAllRequests() {
+        return helpRequestRepository.findAll();
+    }
+
+    public HelpRequest getRequestById(Long id) {
+        return helpRequestRepository.findById(id)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Help request not found with ID: " + id
+                        )
+                );
+    }
+
+    public List<HelpRequest> getRequestsByStatus(String status) {
+        return helpRequestRepository.findByStatus(status.toUpperCase());
+    }
+
 }
