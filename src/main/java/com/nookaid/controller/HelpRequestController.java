@@ -114,4 +114,69 @@ public class HelpRequestController {
         return ResponseEntity.ok(responses);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<HelpRequestResponse> updateRequest(
+            @PathVariable Long id,
+            @Valid @RequestBody HelpRequestRequest request,
+            Authentication authentication
+    ) {
+
+        String email = authentication.getName();
+
+        HelpRequest updatedRequest =
+                helpRequestService.updateRequest(id, request, email);
+
+        HelpRequestResponse response = new HelpRequestResponse(
+                updatedRequest.getId(),
+                updatedRequest.getTitle(),
+                updatedRequest.getDescription(),
+                updatedRequest.getCategory(),
+                updatedRequest.getStatus(),
+                updatedRequest.getUser().getId(),
+                updatedRequest.getUser().getName(),
+                updatedRequest.getCreatedAt()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteRequest(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+
+        String email = authentication.getName();
+
+        helpRequestService.deleteRequest(id, email);
+
+        return ResponseEntity.ok("Help request deleted successfully");
+    }
+
+    @GetMapping("/my-requests")
+    public ResponseEntity<List<HelpRequestResponse>> getMyRequests(
+            Authentication authentication
+    ) {
+
+        String email = authentication.getName();
+
+        List<HelpRequestResponse> responses =
+                helpRequestService.getMyRequests(email)
+                        .stream()
+                        .map(request -> new HelpRequestResponse(
+                                request.getId(),
+                                request.getTitle(),
+                                request.getDescription(),
+                                request.getCategory(),
+                                request.getStatus(),
+                                request.getUser().getId(),
+                                request.getUser().getName(),
+                                request.getCreatedAt()
+                        ))
+                        .toList();
+
+        return ResponseEntity.ok(responses);
+    }
+
+
 }

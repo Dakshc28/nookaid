@@ -61,4 +61,78 @@ public class HelpRequestService {
         return helpRequestRepository.findByStatus(status.toUpperCase());
     }
 
+    public HelpRequest updateRequest(
+            Long id,
+            HelpRequestRequest request,
+            String email
+    ) {
+
+        // Find the existing help request
+        HelpRequest helpRequest = helpRequestRepository.findById(id)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Help request not found with ID: " + id
+                        )
+                );
+
+        // Find the currently logged-in user
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("User not found")
+                );
+
+        // Check whether the logged-in user owns this request
+        if (!helpRequest.getUser().getId().equals(user.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "You are not allowed to update this request"
+            );
+        }
+
+        // Update request details
+        helpRequest.setTitle(request.getTitle());
+        helpRequest.setDescription(request.getDescription());
+        helpRequest.setCategory(request.getCategory());
+
+        return helpRequestRepository.save(helpRequest);
+    }
+
+
+    public void deleteRequest(Long id, String email) {
+
+        // Find the request
+        HelpRequest helpRequest = helpRequestRepository.findById(id)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Help request not found with ID: " + id
+                        )
+                );
+
+        // Find the logged-in user
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("User not found")
+                );
+
+        // Check ownership
+        if (!helpRequest.getUser().getId().equals(user.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "You are not allowed to delete this request"
+            );
+        }
+
+        // Delete the request
+        helpRequestRepository.delete(helpRequest);
+    }
+
+    public List<HelpRequest> getMyRequests(String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("User not found")
+                );
+
+        return helpRequestRepository.findByUserId(user.getId());
+    }
+
+
 }
